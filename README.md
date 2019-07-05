@@ -4,4 +4,10 @@
 
 gitter chat is https://gitter.im/elixir_proteomics_QC/community
 
-test
+Installation instructions: 
+
+* Install Singularity and Nextflow.
+* Git clone pipeline.
+* Configure Nextflow: params.config and nextflow.config
+* Copy mzMLs to the incoming folder. 
+
