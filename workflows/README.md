@@ -1,6 +1,6 @@
 # QCLOUD 2.0 Knime workflows parameters: 
 
-Isotopologues data for only QC03 sampes: </br></br>
+Isotopologues data for only QC03 samples: </br></br>
 
 | Sequence                                             | Mass     | RTref  | Concentr.     | Shortname  | drt | dm | Thresh. area  | 
 |------------------------------------------------------|----------|--------|---------------|------------|-----|----|---------------| 
