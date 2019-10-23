@@ -186,7 +186,7 @@ process makeblastdb {
  * Run msconvert on raw data. In case QC0S add a parameter
  */
 
-process msconvert {
+process thermofilerawparser {
     label 'convert'
   
     tag { "${qcode}_${checksum}" }
