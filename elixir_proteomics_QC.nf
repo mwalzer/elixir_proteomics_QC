@@ -32,7 +32,7 @@ log.info """elixir_proteomics_QC - N F  ~  version ${version}
 └─┘┴─┘┴┴ └─┴┴└─────┴  ┴└─└─┘ ┴ └─┘└─┘┴ ┴┴└─┘└─┘────╚═╝╚╚═╝
 
 ========================================
-mzMLfiles (input files)            : ${params.mzmlfiles}
+zipfiles (input files)            : ${params.zipfiles}
 qconfig (config file)             : ${params.qconfig}
 fasta_tab (tsv file)              : ${params.fasta_tab}
 out_folder (output folder)        : ${params.out_folder}
@@ -66,6 +66,7 @@ if( !out_folder.exists() )  { out_folder.mkdir()}
 srmCSV = file("${CSV_folder}/qtrap_bsa.traml")
 peptideCSV = file("${CSV_folder}/knime_peptides_final.csv")
 peptideCSV_C4L = file("${CSV_folder}/knime_peptides_qc4l.csv")
+MSGFPlus = file("$baseDir/bin/MSGFPlus.jar")
 
 //peptideCSVs
 def peptideCSVs = [:]
@@ -113,18 +114,16 @@ checkWFFiles(baseQCPath, Correspondence.keySet())
 // Below handles original_id from processing of samples: 181112_Q_QC1F_01_01_9d9d9d1b-9d9d-4f1a-9d27-9d2f7635059d_QC01_0d97b132db1ecedc3b5fdbddec6fba72.zip
 
 Channel
-    //.fromPath( params.mzmlfiles )             
-    .watchPath( params.mzmlfiles )             
+    //.fromPath( params.zipfiles )             
+    .watchPath( params.zipfiles )             
     .map { 
         file = it
         id = it.getName()
-        ext = params.mzmlfiles.tokenize( '/' )
+        ext = params.zipfiles.tokenize( '/' )
         pieces = id.tokenize( '_' )
-        labsys = pieces[0]
-        qcode = pieces[1]
-        checksum = pieces[-1].replace(".mzML", "")
-        ["${labsys}_${qcode}_${checksum}", qcode, checksum, file]
-    }.set { mzmlfiles_for_correction }
+        checksum = pieces[-1].replace(".raw.zip", "")
+        [pieces[-2], checksum, file]
+    }.set { zipfiles }
 
 
 /*
@@ -184,6 +183,32 @@ process makeblastdb {
 }
 
 /*
+ * Run msconvert on raw data. In case QC0S add a parameter
+ */
+
+process msconvert {
+    label 'convert'
+  
+    tag { "${qcode}_${checksum}" }
+
+    input:
+    set qcode, checksum, file(zipfile) from zipfiles
+
+    output:
+    set val("${qcode}_${checksum}"), qcode, checksum, file("${qcode}_${checksum}.mzML") into mzmlfiles_for_correction
+    
+    script:
+    def filename = zipfile.getBaseName()
+    """
+    unzip ${zipfile}
+    ThermoRawFileParser -i=${filename} -f=1 -m=0 -o ./
+    """
+}
+
+
+
+
+/*
  * Run batch correction on mzl and eventually unzip the input file
  * We remove the string xmlns="http://psi.hupo.org/ms/mzml" since it can causes problem with some executions
  */
@@ -205,7 +230,7 @@ process correctMzml {
 }
 
 /*
- * Cpombine different channels (blast dbs, corrected mzml files) for obtaining the required input 
+ * Combine different channels (blast dbs, corrected mzml files) for obtaining the required input 
  * for the next steps
  */
 
@@ -242,7 +267,8 @@ process run_shotgun {
 
     output:
     set sample_id, internal_code, analysis_type, checksum, file("${sample_id}.featureXML") into shot_featureXMLfiles_for_calc_peptide_area, shot_featureXMLfiles_for_calc_mass_accuracy, shot_featureXMLfiles_for_calc_median_fwhm
-    set sample_id, internal_code, analysis_type, checksum, file(mzML_file) into shot_mzML_file_for_MedianITMS1, shot_mzML_file_for_MedianITMS2, shot_mzML_file_for_check 
+    set sample_id, internal_code, analysis_type, checksum, file(mzML_file) into shot_mzML_file_for_MedianITMS1, shot_mzML_file_for_MedianITMS2 
+    set sample_id, internal_code, analysis_type, checksum, file(mzML_file), file(fasta_file) into shot_mzML_file_for_check 
     set sample_id, internal_code, analysis_type, checksum, file("${sample_id}.qcml") into qcmlfiles_for_MS2_spectral_count, qcmlfiles_for_tot_num_uniq_peptides, qcmlfiles_for_tot_num_uniq_proteins, qcmlfiles_for_tot_num_psm, qcmlfiles_for_tic
 
     script:
@@ -748,17 +774,18 @@ process calc_tic {
 
 process check_mzML {
     tag { sample_id }
-	   
+    publishDir "${out_folder}/${sample_id}", mode: 'copy', pattern: "*.mzid"	   
+
     input:
-    set sample_id, internal_id, analysis_type, checksum, file(mzML_file) from shot_mzML_file_for_check.mix(srm_mzML_file_for_check, shot_qc4l_cid_mzML_file_for_check, shot_qc4l_hcd_mzML_file_for_check, shot_qc4l_etcid_mzML_file_for_check, shot_qc4l_ethcd_mzML_file_for_check)
+    file(MSGFPlus)
+    set sample_id, internal_id, analysis_type, checksum, file(mzML_file), file(fasta) from shot_mzML_file_for_check.mix(srm_mzML_file_for_check, shot_qc4l_cid_mzML_file_for_check, shot_qc4l_hcd_mzML_file_for_check, shot_qc4l_etcid_mzML_file_for_check, shot_qc4l_ethcd_mzML_file_for_check)
 
     output:
-    set sample_id, internal_id, analysis_type, checksum, file("${mzML_file}.timestamp"), file("${mzML_file}.filename") into mZML_params_for_mapping
+    set sample_id, internal_id, analysis_type, checksum, file("${sample_id}.mzid") into mZML_params_for_mapping
 
     script:
     """
-        xmllint --xpath 'string(/indexedmzML/mzML/run/@startTimeStamp)' ${mzML_file} > ${mzML_file}.timestamp
-        xmllint --xpath 'string(/indexedmzML/mzML/fileDescription/sourceFileList/sourceFile/@name)' ${mzML_file} > ${mzML_file}.filename
+        java -jar ${MSGFPlus} -s ${mzML_file} -o ${sample_id}.mzid -d ${fasta}
     """
 }
 
@@ -768,6 +795,7 @@ process check_mzML {
 
 // mix peptide channels (from QC01, QC02 and QC03 to have for each id a number of results) 
 pep_c4l_all = pep_c4l_for_delivery_fake.mix(pep_c4l_for_delivery, pep_checked_for_delivery)
+
 // joins channels common to any analysis in a single channel 
 ms2_spectral_for_delivery.join(tic_for_delivery).join(tot_psm_for_delivery).join(uni_peptides_for_delivery).join(uni_prots_for_delivery).join(median_itms2_for_delivery).join(mass_checked_for_delivery).join(median_checked_for_delivery).join(median_itms1_for_delivery).join(pep_c4l_all).into{jointJsons; jointJsonsAA}
 
@@ -794,7 +822,7 @@ queueQC03ToBeSent = queueQC03Grouped.map{
 // reshape the QC01-QC02 channel
 queueQC12ToBeSent = queueQC12.map{ 
     def rawids = it[0].tokenize( '_' );
-    def orid = "${rawids[0]}_${rawids[1]}_${rawids[2]}";
+    def orid = "${rawids[0]}_${rawids[1]}";
     def l = [orid]; 
     l.addAll([it.drop(1)]); 
     return l 
@@ -803,33 +831,33 @@ queueQC12ToBeSent = queueQC12.map{
 // mix the QC01-QC02 and QC03 again
 jsonToBeSent = queueQC12ToBeSent.mix(queueQC03ToBeSent)
 
+
 // reshape the mZML params channel for the submission 
-mZML_params_for_delivery = mZML_params_for_mapping.map{
+mZML_params_for_mapping.map{
         def rawids = it[0].tokenize( '_' )
-        def sample_id = "${rawids[0]}_${rawids[1]}_${rawids[2]}"
-        [sample_id , it[1], it[3], it[4].text, it[5].text]
-}.unique()
-
-
-
+        def sample_id = "${rawids[0]}_${rawids[1]}"
+        [sample_id , it[1], it[3], it[4] ]
+}.unique().into {mZML_params_for_delivery; cicco}
 
 /*
  * collect Results
  */
  process collectResults {
     tag { sample_id }
+    publishDir "${out_folder}/${sample_id}", mode: 'copy'
 
     input:
-    set sample_id, internal_code, checksum, timestamp, filename, file("*") from mZML_params_for_delivery.join(jsonToBeSent)
+    set sample_id, internal_code, checksum, file(mzidfile), file("*") from mZML_params_for_delivery.join(jsonToBeSent)
 
+    output:
+    file("${sample_id}.json")
     
     script:
     """
-	mkdir ${out_folder}/${sample_id}
-	cp *.json ${out_folder}/${sample_id}
+	json_merger.sh \$PWD ${sample_id}.json
     """
 }
-
+ 
 
 
 /*
