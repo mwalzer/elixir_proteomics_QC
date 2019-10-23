@@ -772,7 +772,7 @@ process calc_tic {
     knime.launch()
 }
 
-process check_mzML {
+process MSGFPlus {
     tag { sample_id }
     publishDir "${out_folder}/${sample_id}", mode: 'copy', pattern: "*.mzid"	   
 
