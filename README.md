@@ -4,6 +4,12 @@
 
 gitter chat is https://gitter.im/elixir_proteomics_QC/community
 
+## New in this version v.0.2: 
+
+* ThermoFileRawParser (https://github.com/compomics/ThermoRawFileParser) fully inetgrated, so now the input files are (zipped) RAW files instead of mzMLs. 
+
+* At the end of the pipeline all the JSON files for each QC metrics are merged in just one file. 
+
 ## Installation instructions: 
 
 * Install Singularity and Nextflow.
