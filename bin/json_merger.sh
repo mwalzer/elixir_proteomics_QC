@@ -1,9 +1,10 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-# Edit: 
+# Local version: 
 #JSON_MERGED_OUTPUT=/home/rolivella/mydata/toy_dataset/190219_Q_QC02_01_01_100ng_6583a564-93dd-4500-a101-b2fe56496b25_QC02_3f98581e6291b298c2a11a4410d7198e/json_subset
 #JSON_FILENAME_OUTPUT="6583a564-93dd-4500-a101-b2fe56496b25_QC02_3f98581e6291b298c2a11a4410d7198e.json"
 
+# Prod. version: 
 JSON_MERGED_OUTPUT=$1
 JSON_FILENAME_OUTPUT=$2
 
@@ -21,7 +22,10 @@ do
     fi
 done
 
-# Filter anly json files: 
+# Clean FWHM files (remove this line when FWHM is available): 
+rm ${JSON_MERGED_OUTPUT}/*_QC_1010086.json
+
+# Filter only json files: 
 JSON_TO_MERGE=(${JSON_MERGED_OUTPUT}/*.json)
 
 counter=0
