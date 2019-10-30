@@ -6,7 +6,7 @@ gitter chat is https://gitter.im/elixir_proteomics_QC/community
 
 ## New in this version v.0.2: 
 
-* ThermoFileRawParser (https://github.com/compomics/ThermoRawFileParser) fully inetgrated, so now the input files are (zipped) RAW files instead of mzMLs. 
+* ThermoFileRawParser (https://github.com/compomics/ThermoRawFileParser) fully integrated, so now the input files are (zipped) RAW files instead of mzMLs. 
 
 * At the end of the pipeline all the JSON files for each QC metrics are merged in just one file. 
 
@@ -22,7 +22,8 @@ git clone https://github.com/elixir-cloud-proteomics-workflows/elixir_proteomics
 * Configure Nextflow: params.config 
 
 ```
-zipfiles         = "$baseDir/path_to/*.zip"
+zipfiles = "$baseDir/path_to/*.zip"
+fasta_tab = "$baseDir/fasta.tsv"
 ```
 
 Now input files must be zipped RAW files with this format: 
@@ -31,7 +32,7 @@ Now input files must be zipped RAW files with this format:
 {QC01|QC02}_{checksum}.raw.zip 
 ```
 
-where {QC01|QC02} is the sample type, QC01 for BSA and QC01 for HeLa (Human). 
+where {QC01|QC02} is the sample type, QC01 for BSA and QC02 for HeLa (Human). 
 
 For instance: 
 
