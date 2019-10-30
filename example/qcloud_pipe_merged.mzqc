@@ -1,0 +1,130 @@
+{ "mzQC": {
+  "creationDate": "2019-10-30T12:20:26",
+  "version": "0_0_11",
+  "runQualities": [
+    {
+      "metadata": {
+        "inputFiles": [
+          {
+            "location": "file:///dev/null",
+            "name": "qcloud_pipe_merged.json",
+            "fileFormat": {
+              "cvRef": "MS",
+              "accession": "MS:1000584",
+              "name": "mzML format"
+            },
+            "fileProperties": [
+              {
+                "cvRef": "MS",
+                "accession": "MS:1000747",
+                "name": "completion time",
+                "value": "2019-10-30 15:26:50.093306"
+              },
+              {
+                "cvRef": "MS",
+                "accession": "MS:1000569",
+                "name": "SHA-1",
+                "value": "3f98581e6291b298c2a11a4410d7198e"
+              },
+              {
+                "cvRef": "MS",
+                "accession": "MS:1000031",
+                "name": "instrument model",
+                "value": "thermo"
+              }
+            ]
+          }
+        ],
+        "analysisSoftware": [
+          {
+            "cvRef": "MS",
+            "accession": "MS:1000752",
+            "name": "TOPP software",
+            "version": "2.4",
+            "uri": "openms.de"
+          }
+        ]
+      },
+      "qualityMetrics": [
+        {
+          "cvRef": "QC",
+          "accession": "QC:9000001",
+          "name": "MS2 spectra count",
+          "value": "44927"
+        },
+        {
+          "cvRef": "QC",
+          "accession": "QC:9000001",
+          "name": "Total number of PSMs",
+          "value": "21762"
+        },
+        {
+          "cvRef": "QC",
+          "accession": "QC:9000001",
+          "name": "Total number of uniquely identified peptides",
+          "value": "20051"
+        },
+        {
+          "cvRef": "QC",
+          "accession": "QC:9000001",
+          "name": "Total number of identified proteins",
+          "value": "4964"
+        },
+        {
+          "cvRef": "QC",
+          "accession": "QC:9000005",
+          "name": "QCloud metric 5",
+          "value": 243.7502275042
+        },
+        {
+          "cvRef": "MS",
+          "accession": "MS:1000014",
+          "name": "accuracy",
+          "value": {
+            "QCPeptide": [
+              "STLTDSLVC(Carbamidomethyl)K","SLADELALVDVLEDK","NPDDITNEEYGEFYK","LGDLYEEEMR","LAVDEEENADNNTK","FEELNMDLFR","EAALSTALSEK","RFPGYDSESK","EVSTYIK","EATTEFSVDAR","FAFQAEVNR","EQFLDGDGWTSR","YAEAVTR","TPAQFDADELR","DDVAQTDLLQIDPNFGSK"
+            ],
+            "accuracy": [
+              -0.021102340812323823,0.07967688738387801,-0.04942172302333083,-0.062251707785564776,-0.03420495018764933,-0.0521065630495078,-0.4671669501192978,-0.17868974203492186,-0.02907632119078123,-0.14929578979905006,-0.06667254659116802,0.030307140366714894,0.0,0.0,0.0
+            ]
+          }
+        },
+        {
+          "cvRef": "MS",
+          "accession": "MS:1001844",
+          "name": "MS1 feature area",
+          "value": {
+            "QCPeptide": [
+              "STLTDSLVC(Carbamidomethyl)K","SLADELALVDVLEDK","NPDDITNEEYGEFYK","LGDLYEEEMR","LAVDEEENADNNTK","FEELNMDLFR","EAALSTALSEK","RFPGYDSESK","EVSTYIK","EATTEFSVDAR","FAFQAEVNR","EQFLDGDGWTSR","YAEAVTR","TPAQFDADELR","DDVAQTDLLQIDPNFGSK"
+            ],
+            "MS1 feature area": [
+              350778000.0,62381600.0,149283000.0,104712000.0,239217000.0,22026000.0,157414000.0,426430000.0,1813800000.0,43866400.0,74695200.0,151154000.0,0.0,0.0,0.0
+            ]
+          }
+        },
+        {
+          "cvRef": "QC",
+          "accession": "QC:9000002",
+          "name": "QCloud calibration metric 2",
+          "value": {
+            "MS:1000927": 1.6103179454805,
+            "MS:1000928": 33.409999847412
+          }
+        }
+      ]
+    }
+  ],
+  "setQualities": [],
+  "controlledVocabularies": [
+    {
+      "ref": "QC",
+      "name": "PSI-QC",
+      "uri": "https://raw.githubusercontent.com/HUPO-PSI/mzQC/master/cv/qc-cv.obo"
+    },
+    {
+      "ref": "MS",
+      "name": "PSI-MS",
+      "uri": "https://raw.githubusercontent.com/HUPO-PSI/psi-ms-CV/master/psi-ms.obo"
+    }
+  ]
+} }

@@ -857,8 +857,26 @@ mZML_params_for_mapping.map{
 	json_merger.sh \$PWD ${sample_id}.json
     """
 }
- 
 
+/*
+ * convert to mzqc
+ */
+ process convertResults {
+    /*needs container with py3, mzqc, pronto, click - see image folder for Dockerfile*/
+    tag { sample_id }
+    publishDir "${out_folder}/${sample_id}", mode: 'copy'
+
+    input:
+    set sample_id, internal_code, checksum, file(mzidfile), file("*") from mZML_params_for_delivery.join(jsonToBeSent)
+
+    output:
+    file("${sample_id}.json")
+    
+    script:
+    """
+	python qcloud_mzqc_conversion_v0.1.py -input ${sample_id}.json -output ${sample_id}.mzqc
+    """
+}
 
 /*
  * Functions
